@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { Button, message } from 'antd'
+import { Button } from 'antd'
 import { withRouter, RouteComponentProps } from 'react-router-dom'
 import styles from './page-b.scss'
 
