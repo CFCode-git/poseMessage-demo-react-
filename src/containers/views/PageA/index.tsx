@@ -1,38 +1,76 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Button } from 'antd'
 import { withRouter, RouteComponentProps } from 'react-router-dom'
-import ShowCount from '@components/ShowCount'
-import CountOperation from '@components/CountOperation'
-import { getArticleList } from '@services/api'
-
 import styles from './page-a.scss'
 
+type MessageData = {
+    from: string
+    data: string
+}
+
 const PageA = ({ history }: RouteComponentProps) => {
-    const getList = async () => {
-        try {
-            const res = await getArticleList()
-            console.log(res)
-        } catch (error) {
-            console.log('error', error)
+    console.log('pageA 执行了')
+    const bc = useRef<BroadcastChannel>(null)
+    const [message, setMessage] = useState('0')
+    const dataList = useRef<MessageData[]>([])
+    const update = useState(null)[1]
+    const messagePost = () => {
+        console.log('post message')
+        bc.current.postMessage({ message, from: 'PageA' })
+    }
+    const closeChannel = () => {
+        console.log('close channel')
+        bc.current.close()
+    }
+
+    const openChannel = () => {
+        console.log('open channel')
+        if (bc.current) {
+            bc.current.close()
+        }
+        bc.current = new BroadcastChannel('testPostMessage')
+        console.log('hi')
+        bc.current.onmessage = function (e) {
+            console.log('hi')
+            console.log(e)
+            const { message: data, from } = e.data
+            console.log(dataList.current)
+            dataList.current.push({ data, from })
+            update(Math.random())
         }
     }
+
+    useEffect(() => {
+        console.log('执行了')
+        openChannel()
+    }, [])
+
     return (
         <div>
             <div>PageA</div>
             <Button type="primary" onClick={() => history.push('/page-b')}>
                 Go To B
             </Button>
-            <hr />
-            <ShowCount />
-            <CountOperation />
-            <hr />
-            <div>
-                <Button onClick={getList}>获取文章列表</Button>
+            <div className={styles.postMessageTest}>
+                <input
+                    type="text"
+                    value={message}
+                    onChange={(e) => {
+                        setMessage(e.target.value)
+                    }}
+                />
+                <Button type="primary" onClick={messagePost}>
+                    postMessage
+                </Button>
+                <Button type="primary" onClick={closeChannel}>
+                    closeChannel
+                </Button>
+                <Button type="primary" onClick={openChannel}>
+                    openChannel
+                </Button>
+                {message}
             </div>
-            <hr />
-            <div className={styles['page-a']}>page-a css</div>
-            <hr />
-            <div>{process.env.NODE_ENV}</div>
+            <div className={styles.postMessageTest}>{JSON.stringify(dataList.current)}</div>
         </div>
     )
 }

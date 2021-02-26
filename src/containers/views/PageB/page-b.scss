@@ -1,8 +1,10 @@
-@import 'base.scss';
-
-.page-a {
-    color: $blue;
+.message {
     border: 1px solid red;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 20px;
+    margin: 20px;
 }
 
 .postMessageTest {
